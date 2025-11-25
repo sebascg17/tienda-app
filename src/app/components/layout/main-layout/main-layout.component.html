@@ -1,0 +1,24 @@
+<!-- layouts/main-layout/main-layout.component.html -->
+<div class="min-h-screen flex flex-col bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-md py-4 px-8 flex justify-between items-center">
+    <h1 class="text-2xl font-semibold text-gray-800">Mi Tienda</h1>
+    <nav class="flex gap-6 text-gray-600">
+      <a routerLink="/" routerLinkActive="text-blue-600 font-medium">Inicio</a>
+      <a routerLink="/productos" routerLinkActive="text-blue-600 font-medium">Productos</a>
+      <a routerLink="/categorias" routerLinkActive="text-blue-600 font-medium">Categorías</a>
+      <a routerLink="/pedidos" routerLinkActive="text-blue-600 font-medium">Pedidos</a>
+      <a routerLink="/contacto" routerLinkActive="text-blue-600 font-medium">Contacto</a>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="flex-grow p-8">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-200 py-4 text-center">
+    © {{ currentYear }} Tienda App - Todos los derechos reservados.
+  </footer>
+</div>

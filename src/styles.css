@@ -1,0 +1,16 @@
+
+@import "primeicons/primeicons.css";
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* ✅ Luego van las directivas de Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ✅ Finalmente tus estilos globales */
+body {
+  @apply bg-gray-100 text-gray-900;
+  font-family: 'Poppins', sans-serif;
+}
