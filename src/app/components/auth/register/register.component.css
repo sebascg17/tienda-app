@@ -1,0 +1,120 @@
+/* Estilos base del contenedor de register */
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  transition: background-color 0.3s;
+}
+
+/* Fondos según rol - Modo Claro */
+.register-container.role-cliente {
+  background-color: rgb(220, 252, 231);
+  /* green-100 */
+}
+
+.register-container.role-tendero {
+  background-color: rgb(243, 244, 246);
+  /* gray-100 */
+}
+
+.register-container.role-admin {
+  background-color: rgb(30, 41, 59);
+  /* slate-800 - tono azul oscuro */
+}
+
+/* Fondos según rol - Modo Oscuro */
+:host-context(.dark) .register-container.role-cliente {
+  background-color: rgb(5, 46, 22);
+  /* green-950 - verde muy oscuro */
+}
+
+:host-context(.dark) .register-container.role-tendero {
+  background-color: rgb(17, 24, 39);
+  /* gray-900 */
+}
+
+:host-context(.dark) .register-container.role-admin {
+  background-color: rgb(3, 7, 18);
+  /* gray-950 */
+}
+
+/* Card contenedor */
+.register-card {
+  max-width: 28rem;
+  width: 100%;
+  padding: 2.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Card según rol - Modo Claro */
+.register-card.role-cliente,
+.register-card.role-tendero {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgb(220, 252, 231);
+  /* green-100 */
+}
+
+.register-card.role-admin {
+  background-color: rgb(51, 65, 85);
+  /* slate-700 - tono azul más claro */
+  border: 1px solid rgb(71, 85, 105);
+  /* slate-600 */
+}
+
+/* Card - Modo Oscuro */
+:host-context(.dark) .register-card.role-cliente,
+:host-context(.dark) .register-card.role-tendero,
+:host-context(.dark) .register-card.role-admin {
+  background-color: rgb(31, 41, 55);
+  /* gray-800 */
+  border: 1px solid rgb(55, 65, 81);
+  /* gray-700 */
+}
+
+/* Inputs según rol - Modo Claro */
+.auth-input.role-cliente,
+.auth-input.role-tendero {
+  background-color: rgb(243, 244, 246);
+  /* gray-100 */
+  color: rgb(17, 24, 39);
+  /* gray-900 */
+}
+
+.auth-input.role-admin {
+  background-color: rgb(75, 85, 99);
+  /* gray-600 */
+  color: rgb(243, 244, 246);
+  /* gray-100 */
+}
+
+/* Inputs - Modo Oscuro */
+:host-context(.dark) .auth-input.role-cliente,
+:host-context(.dark) .auth-input.role-tendero,
+:host-context(.dark) .auth-input.role-admin {
+  background-color: rgb(55, 65, 81);
+  /* gray-700 */
+  color: rgb(243, 244, 246);
+  /* gray-100 */
+}
+
+/* Labels según rol */
+.auth-label.role-cliente,
+.auth-label.role-tendero {
+  color: rgb(31, 41, 55);
+  /* gray-800 */
+}
+
+.auth-label.role-admin {
+  color: rgb(248, 250, 252);
+  /* slate-50 - texto muy claro para máximo contraste */
+}
+
+:host-context(.dark) .auth-label {
+  color: rgb(229, 231, 235);
+  /* gray-200 */
+}

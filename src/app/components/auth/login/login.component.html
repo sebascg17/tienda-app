@@ -1,3 +1,130 @@
-<button (click)="loginGoogle()" type="button">
-  Iniciar sesión con Google
-</button>
+<div class="login-container" [ngClass]="'role-' + loginRole.toLowerCase()">
+  <div class="login-card space-y-8" [ngClass]="'role-' + loginRole.toLowerCase()">
+    <div>
+      <!-- Título del Rol -->
+      <div class="text-center mb-4">
+        <span class="inline-block px-4 py-2 rounded-full text-sm font-bold" [ngClass]="{
+            'bg-[#08d15f] text-white': loginRole === 'Cliente',
+            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200': loginRole === 'Tendero',
+            'bg-blue-100 text-blue-700': loginRole === 'Admin'
+          }">
+          {{ loginRole === 'Cliente' ? 'ACCESO CLIENTE' : loginRole === 'Tendero' ? 'ACCESO VENDEDOR' : 'ACCESO ADMIN'
+          }}
+        </span>
+      </div>
+
+      <!-- Logo SFENIX -->
+      <div class="flex justify-center mb-6">
+        <img src="assets/logo/SFENIX_GC_CON_TEXTO_VERDE.png" alt="SFENIX Logo" class="h-20 w-auto object-contain">
+      </div>
+
+      <p class="text-center text-sm" [ngClass]="{
+          'text-gray-600 dark:text-gray-400': loginRole !== 'Admin',
+          'text-slate-200': loginRole === 'Admin'
+        }">
+        Inicia sesión para gestionar tu {{ loginRole === 'Tendero' ? 'tienda' : 'cuenta' }}
+      </p>
+    </div>
+
+    <!-- Formulario Email/Password -->
+    <form class="mt-8 space-y-6" (ngSubmit)="loginEmail()">
+      <div class="space-y-4">
+        <div>
+          <label for="email-address" class="auth-label block text-sm font-medium mb-2"
+            [ngClass]="'role-' + loginRole.toLowerCase()">Correo electrónico</label>
+          <input id="email-address" name="email" type="email" autocomplete="email" required
+            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+            [ngClass]="'role-' + loginRole.toLowerCase()" placeholder="tu@email.com" [(ngModel)]="email">
+        </div>
+        <div>
+          <label for="password" class="auth-label block text-sm font-medium mb-2"
+            [ngClass]="'role-' + loginRole.toLowerCase()">Contraseña</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required
+            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+            [ngClass]="'role-' + loginRole.toLowerCase()" placeholder="••••••••" [(ngModel)]="password">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <input id="remember-me" name="remember-me" type="checkbox"
+            class="h-4 w-4 text-[#08d15f] focus:ring-[#08d15f] border-gray-300 rounded">
+          <label for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            Recordarme
+          </label>
+        </div>
+
+        <div class="text-sm">
+          <a href="#" class="font-medium text-[#08d15f] hover:text-green-500">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <button type="submit"
+          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#08d15f] hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#08d15f] transition-colors shadow-md">
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <i class="pi pi-lock text-green-200 group-hover:text-white"></i>
+          </span>
+          Iniciar Sesión
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-6">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-3 text-gray-500 dark:text-gray-400" [ngClass]="{
+              'bg-white dark:bg-gray-800': loginRole !== 'Admin',
+              'bg-slate-700 text-slate-200': loginRole === 'Admin'
+            }">
+            O continúa con
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-3 gap-3">
+        <!-- Google -->
+        <div>
+          <button (click)="loginGoogle()"
+            class="social-button w-full inline-flex justify-center py-3 px-4 border-0 rounded-md text-sm font-medium transition-colors"
+            [ngClass]="'role-' + loginRole.toLowerCase()">
+            <i class="pi pi-google text-red-500 text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Facebook -->
+        <div>
+          <button (click)="loginFacebook()"
+            class="social-button w-full inline-flex justify-center py-3 px-4 border-0 rounded-md text-sm font-medium transition-colors"
+            [ngClass]="'role-' + loginRole.toLowerCase()">
+            <i class="pi pi-facebook text-blue-600 text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Microsoft -->
+        <div>
+          <button (click)="loginMicrosoft()"
+            class="social-button w-full inline-flex justify-center py-3 px-4 border-0 rounded-md text-sm font-medium transition-colors"
+            [ngClass]="'role-' + loginRole.toLowerCase()">
+            <i class="pi pi-microsoft text-blue-500 text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-6 text-center">
+        <p class="text-sm" [ngClass]="{
+            'text-gray-600 dark:text-gray-400': loginRole !== 'Admin',
+            'text-slate-200': loginRole === 'Admin'
+          }">
+          ¿No tienes una cuenta?
+          <a [routerLink]="registerLink" class="font-medium text-[#08d15f] hover:text-green-500">Regístrate aquí</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

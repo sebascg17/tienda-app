@@ -1,1 +1,188 @@
-<p>register works!</p>
+<div class="register-container" [ngClass]="'role-' + registerRole.toLowerCase()">
+  <div class="register-card space-y-8" [ngClass]="'role-' + registerRole.toLowerCase()">
+    <div>
+      <div class="flex justify-center">
+        <div class="w-16 h-16 bg-[#08d15f] rounded-full flex items-center justify-center">
+          <i class="pi pi-user-plus text-white text-3xl"></i>
+        </div>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-100 dark:text-white">
+        Crear Cuenta
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-200 dark:text-gray-400">
+        Únete a <span class="text-[#08d15f] font-bold">SFENIX</span> hoy mismo
+      </p>
+    </div>
+
+    <form class="mt-8 space-y-6" [formGroup]="registerForm" (ngSubmit)="register()">
+
+      <div *ngIf="errorMsg" [ngClass]="{
+          'bg-red-50 text-red-700 border-red-500': errorType === 'error',
+          'bg-yellow-50 text-yellow-700 border-yellow-500': errorType === 'warning'
+        }" class="p-3 rounded-md text-sm border-l-4">
+        {{ errorMsg }}
+      </div>
+
+      <div class="rounded-md shadow-sm space-y-4">
+
+        <!-- Nombre -->
+        <div>
+          <label for="nombre" class="auth-label block text-sm font-medium mb-2"
+            [ngClass]="'role-' + registerRole.toLowerCase()">Nombre Completo</label>
+          <input id="nombre" formControlName="nombre" type="text"
+            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+            [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="Tu nombre completo">
+          <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="text-xs text-red-500 mt-1">
+            El nombre es requerido.
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="auth-label block text-sm font-medium mb-2"
+            [ngClass]="'role-' + registerRole.toLowerCase()">Correo Electrónico</label>
+          <input id="email" formControlName="email" type="email" autocomplete="email"
+            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+            [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="ejemplo@correo.com">
+          <div *ngIf="f['email'].touched && f['email'].errors?.['email']" class="text-xs text-red-500 mt-1">
+            Correo inválido.
+          </div>
+        </div>
+
+
+
+        <!-- Campos Dinámicos para Tendero -->
+        <div *ngIf="isTendero"
+          class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 space-y-4 animate-fade-in-down transition-colors">
+          <h3 class="text-sm font-bold text-green-800 dark:text-green-400 flex items-center gap-2">
+            <i class="pi pi-shop"></i> Datos de tu Tienda
+          </h3>
+
+          <div>
+            <label for="nombreTienda"
+              class="block text-xs font-semibold text-green-700 dark:text-green-300 uppercase">Nombre de la
+              Tienda</label>
+            <input id="nombreTienda" formControlName="nombreTienda" type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 transition-colors"
+              placeholder="Ej: Modas Sfenix">
+            <div *ngIf="f['nombreTienda'].touched && f['nombreTienda'].invalid" class="text-xs text-red-600 mt-1">
+              El nombre de la tienda es obligatorio.
+            </div>
+          </div>
+
+
+          <!-- País -->
+          <div>
+            <label for="pais" class="block text-xs font-semibold text-green-700 dark:text-green-300 uppercase">País
+              *</label>
+            <input id="pais" formControlName="pais" type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 transition-colors"
+              placeholder="Ej: Colombia">
+            <div *ngIf="f['pais'].touched && f['pais'].invalid" class="text-xs text-red-600 mt-1">
+              El país es obligatorio.
+            </div>
+          </div>
+
+          <!-- Departamento/Estado -->
+          <div>
+            <label for="departamento"
+              class="block text-xs font-semibold text-green-700 dark:text-green-300 uppercase">Departamento/Estado
+              *</label>
+            <input id="departamento" formControlName="departamento" type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 transition-colors"
+              placeholder="Ej: Antioquia">
+            <div *ngIf="f['departamento'].touched && f['departamento'].invalid" class="text-xs text-red-600 mt-1">
+              El departamento es obligatorio.
+            </div>
+          </div>
+
+          <!-- Ciudad -->
+          <div>
+            <label for="ciudad" class="block text-xs font-semibold text-green-700 dark:text-green-300 uppercase">Ciudad
+              *</label>
+            <input id="ciudad" formControlName="ciudad" type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 transition-colors"
+              placeholder="Ej: Medellín">
+            <div *ngIf="f['ciudad'].touched && f['ciudad'].invalid" class="text-xs text-red-600 mt-1">
+              La ciudad es obligatoria.
+            </div>
+          </div>
+
+          <!-- Barrio -->
+          <div>
+            <label for="barrio" class="block text-xs font-semibold text-green-700 dark:text-green-300 uppercase">Barrio
+              *</label>
+            <input id="barrio" formControlName="barrio" type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 transition-colors"
+              placeholder="Ej: El Poblado">
+            <div *ngIf="f['barrio'].touched && f['barrio'].invalid" class="text-xs text-red-600 mt-1">
+              El barrio es obligatorio.
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <div>
+            <label for="direccion"
+              class="block text-xs font-semibold text-green-700 dark:text-green-300 uppercase">Dirección Exacta
+              *</label>
+            <input id="direccion" formControlName="direccion" type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 transition-colors"
+              placeholder="Ej: Calle 10 # 45-67">
+            <div *ngIf="f['direccion'].touched && f['direccion'].invalid" class="text-xs text-red-600 mt-1">
+              La dirección es obligatoria.
+            </div>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="relative">
+          <label for="password" class="auth-label block text-sm font-medium mb-2"
+            [ngClass]="'role-' + registerRole.toLowerCase()">Contraseña</label>
+          <input id="password" formControlName="password" [type]="showPassword ? 'text' : 'password'"
+            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+            [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="Mínimo 6 caracteres">
+          <button type="button" (click)="togglePassword()"
+            class="absolute top-8 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+            <i class="pi" [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+          </button>
+          <div *ngIf="f['password'].touched && f['password'].errors?.['minlength']" class="text-xs text-red-500 mt-1">
+            Mínimo 6 caracteres.
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="relative">
+          <label for="confirmPassword" class="auth-label block text-sm font-medium mb-2"
+            [ngClass]="'role-' + registerRole.toLowerCase()">Confirmar Contraseña</label>
+          <input id="confirmPassword" formControlName="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+            [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="Repite tu contraseña">
+          <button type="button" (click)="toggleConfirmPassword()"
+            class="absolute top-8 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+            <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+          </button>
+        </div>
+
+        <!-- Mismatch Error -->
+        <div *ngIf="registerForm.hasError('mismatch') && f['confirmPassword'].touched"
+          class="text-sm text-red-600 animate-pulse flex items-center gap-1">
+          <i class="pi pi-exclamation-circle"></i> Las contraseñas no coinciden.
+        </div>
+      </div>
+
+      <div>
+        <button type="submit" [disabled]="registerForm.invalid"
+          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#08d15f] hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#08d15f] transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+          Crear Cuenta
+        </button>
+      </div>
+
+      <div class="text-center text-sm">
+        <a [routerLink]="loginLink" class="font-medium text-[#08d15f] hover:text-green-500">
+          ¿Ya tienes cuenta? Inicia sesión
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

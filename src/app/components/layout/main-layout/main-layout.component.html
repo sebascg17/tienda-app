@@ -1,24 +1,170 @@
-<!-- layouts/main-layout/main-layout.component.html -->
-<div class="min-h-screen flex flex-col bg-gray-50">
+<div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
   <!-- Header -->
-  <header class="bg-white shadow-md py-4 px-8 flex justify-between items-center">
-    <h1 class="text-2xl font-semibold text-gray-800">Mi Tienda</h1>
-    <nav class="flex gap-6 text-gray-600">
-      <a routerLink="/" routerLinkActive="text-blue-600 font-medium">Inicio</a>
-      <a routerLink="/productos" routerLinkActive="text-blue-600 font-medium">Productos</a>
-      <a routerLink="/categorias" routerLinkActive="text-blue-600 font-medium">Categorías</a>
-      <a routerLink="/pedidos" routerLinkActive="text-blue-600 font-medium">Pedidos</a>
-      <a routerLink="/contacto" routerLinkActive="text-blue-600 font-medium">Contacto</a>
-    </nav>
+  <header
+    class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- SECCIÓN IZQUIERDA -->
+        <div class="flex items-center justify-start w-1/4">
+          <!-- Mobile: Menú Hamburguesa (Solo logueado) -->
+          <button *ngIf="isAuthenticated" (click)="toggleSidebar()"
+            class="lg:hidden p-2 rounded-md text-[#08d15f] hover:bg-green-50 dark:hover:bg-green-900/20 focus:outline-none transition-colors">
+            <i class="pi pi-bars text-2xl"></i>
+          </button>
+
+          <!-- Desktop: Logo (Visible en LG+) -->
+          <div class="hidden lg:flex items-center">
+            <a [routerLink]="getHomeRoute()" class="cursor-pointer">
+              <img [src]="logoPath" alt="SFENIX Logo" class="h-10 transition-all duration-300">
+            </a>
+          </div>
+        </div>
+
+        <!-- SECCIÓN CENTRO -->
+        <div class="flex items-center justify-center w-2/4">
+          <!-- Mobile: Logo (Centrado en < LG) -->
+          <div class="lg:hidden flex justify-center w-full">
+            <a [routerLink]="getHomeRoute()" class="cursor-pointer">
+              <img [src]="logoPath" alt="SFENIX Logo" class="h-8 transition-all duration-300">
+            </a>
+          </div>
+
+          <!-- Desktop: Menú Central (Iconos) - Solo si está autenticado -->
+          <nav *ngIf="isAuthenticated" class="hidden lg:flex items-center gap-6">
+            <a routerLink="/" routerLinkActive="text-[#08d15f] bg-green-50 dark:bg-green-900/20"
+              [routerLinkActiveOptions]="{exact: true}"
+              class="p-2 rounded-full text-[#08d15f] dark:text-[#08d15f] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Inicio">
+              <i class="pi pi-home text-xl"></i>
+            </a>
+
+            <a routerLink="/productos" routerLinkActive="text-[#08d15f] bg-green-50 dark:bg-green-900/20"
+              class="p-2 rounded-full text-[#08d15f] dark:text-[#08d15f] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Productos">
+              <i class="pi pi-box text-xl"></i>
+            </a>
+
+            <a [routerLink]="dashboardLink" routerLinkActive="text-[#08d15f] bg-green-50 dark:bg-green-900/20"
+              class="p-2 rounded-full text-[#08d15f] dark:text-[#08d15f] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Dashboard">
+              <i class="pi pi-th-large text-xl"></i>
+            </a>
+
+            <a routerLink="/pedidos" routerLinkActive="text-[#08d15f] bg-green-50 dark:bg-green-900/20"
+              class="p-2 rounded-full text-[#08d15f] dark:text-[#08d15f] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Pedidos">
+              <i class="pi pi-shopping-bag text-xl"></i>
+            </a>
+          </nav>
+        </div>
+
+        <!-- SECCIÓN DERECHA: Utilidades (Siempre visible) -->
+        <div class="flex items-center justify-end w-1/4 gap-3">
+
+          <!-- Selector de Idioma (Botón único) -->
+          <button (click)="changeLanguage(currentLang === 'ES' ? 'EN' : 'ES')"
+            class="p-2 rounded-full text-[#08d15f] dark:text-[#08d15f] hover:bg-green-50 dark:hover:bg-gray-700/50 transition-colors"
+            [title]="'Cambiar a ' + (currentLang === 'ES' ? 'English' : 'Español')">
+            <span class="text-sm font-bold">{{ currentLang }}</span>
+          </button>
+
+          <!-- Theme Toggle (Branding #08d15f) -->
+          <button (click)="toggleTheme()"
+            class="p-2 transition-colors text-[#08d15f] dark:text-[#08d15f] hover:bg-green-50 dark:hover:bg-gray-700/50 rounded-full">
+            <i class="pi text-xl" [ngClass]="{'pi-moon': !isDarkMode, 'pi-sun': isDarkMode}"></i>
+          </button>
+
+          <!-- Perfil / Login Icon -->
+          <div *ngIf="isAuthenticated" class="relative ml-1">
+            <button (click)="toggleDrawer()"
+              class="h-9 w-9 rounded-full bg-[#08d15f] flex items-center justify-center text-white font-bold border-2 border-green-100 shadow hover:bg-green-600 transition-colors">
+              {{ userInitial }}
+            </button>
+
+            <!-- Profile Drawer -->
+            <div *ngIf="isDrawerOpen"
+              class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-100 dark:border-gray-700 animate-fade-in-down">
+              <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ userName }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
+              </div>
+              <a routerLink="/profile"
+                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Configuración</a>
+              <button (click)="logout()"
+                class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10">Cerrar
+                Sesión</button>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
   </header>
 
+  <!-- Sidebar (Izquierda - Navegación) -->
+  <div *ngIf="isAuthenticated">
+    <!-- Overlay -->
+    <div *ngIf="isSidebarOpen" (click)="toggleSidebar()"
+      class="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"></div>
+
+    <!-- Sidebar Panel -->
+    <aside
+      class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl"
+      [ngClass]="{'translate-x-0': isSidebarOpen, '-translate-x-full': !isSidebarOpen}">
+
+      <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Menú</h2>
+        <button (click)="toggleSidebar()" class="text-gray-500 hover:text-red-500">
+          <i class="pi pi-times text-xl"></i>
+        </button>
+      </div>
+
+      <nav class="p-4 space-y-2">
+        <a routerLink="/" (click)="toggleSidebar()" routerLinkActive="bg-[#08d15f]/10 text-[#08d15f]"
+          [routerLinkActiveOptions]="{exact: true}"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <i class="pi pi-home"></i> Inicio
+        </a>
+
+        <a [routerLink]="dashboardLink" (click)="toggleSidebar()" routerLinkActive="bg-[#08d15f]/10 text-[#08d15f]"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <i class="pi pi-th-large"></i> Dashboard
+        </a>
+
+        <a routerLink="/productos" (click)="toggleSidebar()" routerLinkActive="bg-[#08d15f]/10 text-[#08d15f]"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <i class="pi pi-box"></i> Productos
+        </a>
+
+        <a routerLink="/pedidos" (click)="toggleSidebar()" routerLinkActive="bg-[#08d15f]/10 text-[#08d15f]"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+          <i class="pi pi-shopping-bag"></i> Pedidos
+        </a>
+      </nav>
+
+      <div class="absolute bottom-0 w-full p-4 border-t border-gray-100 dark:border-gray-700">
+        <button (click)="logout()"
+          class="flex items-center gap-3 px-4 py-3 w-full text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors">
+          <i class="pi pi-sign-out"></i> Cerrar Sesión
+        </button>
+      </div>
+    </aside>
+  </div>
+
   <!-- Contenido principal -->
-  <main class="flex-grow p-8">
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300">
     <router-outlet></router-outlet>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-800 text-gray-200 py-4 text-center">
-    © {{ currentYear }} Tienda App - Todos los derechos reservados.
+  <footer
+    class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto transition-colors duration-300">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-gray-500 dark:text-gray-400 text-sm">
+        © {{ currentYear }} SFENIX Platform. Todos los derechos reservados.
+      </p>
+    </div>
   </footer>
 </div>

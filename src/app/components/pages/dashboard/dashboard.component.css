@@ -1,0 +1,8 @@
+/* Dashboard specific styles if needed */
+:host ::ng-deep .p-card {
+    border-radius: 1rem;
+}
+
+:host ::ng-deep .p-card .p-card-content {
+    padding: 0;
+}
