@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+
 import { environment } from '../../../../environments/environment';
+import { LocationService } from '../../../core/services/location.service';
 
 @Component({
   selector: 'app-register',
@@ -22,15 +24,22 @@ export class RegisterComponent implements OnInit {
   loginLink = '/login'; // Link dinámico de login
   registerRole = 'Cliente'; // Rol del registro (Cliente, Tendero, Admin)
 
+  // Listas para selectores geográficos
+  paises: any[] = [];
+  departamentos: any[] = [];
+  municipios: any[] = [];
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
-    private route: ActivatedRoute // Inyectar ActivatedRoute
+    private route: ActivatedRoute, // Inyectar ActivatedRoute
+    private locationService: LocationService
   ) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.cargarPaises(); // Cargar países al iniciar
 
     // Verificar si hay un rol predefinido en la ruta (data)
     this.route.data.subscribe(data => {
@@ -65,13 +74,14 @@ export class RegisterComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
       rol: ['Cliente', [Validators.required]],
-      // Campos para Tendero
-      nombreTienda: [''],
-      pais: [''],
-      departamento: [''],
-      ciudad: [''],
-      barrio: [''],
-      direccion: ['']
+
+      // Campos Comunes (Paso 1 - Simplificado)
+      pais: ['', [Validators.required]],
+      departamento: ['', [Validators.required]],
+      ciudad: ['', [Validators.required]],
+      codigoPais: ['+57'],
+      telefono: [''],
+      fechaNacimiento: ['']
     }, { validators: this.passwordMatchValidator });
 
     // Escuchar cambios en el rol para validaciones dinámicas
@@ -81,34 +91,8 @@ export class RegisterComponent implements OnInit {
   }
 
   updateValidators(rol: string) {
-    const nombreTiendaControl = this.registerForm.get('nombreTienda');
-    const paisControl = this.registerForm.get('pais');
-    const departamentoControl = this.registerForm.get('departamento');
-    const ciudadControl = this.registerForm.get('ciudad');
-    const barrioControl = this.registerForm.get('barrio');
-    const direccionControl = this.registerForm.get('direccion');
-
-    if (rol === 'Tendero') {
-      nombreTiendaControl?.setValidators([Validators.required]);
-      paisControl?.setValidators([Validators.required]);
-      departamentoControl?.setValidators([Validators.required]);
-      ciudadControl?.setValidators([Validators.required]);
-      barrioControl?.setValidators([Validators.required]);
-      direccionControl?.setValidators([Validators.required]);
-    } else {
-      nombreTiendaControl?.clearValidators();
-      paisControl?.clearValidators();
-      departamentoControl?.clearValidators();
-      ciudadControl?.clearValidators();
-      barrioControl?.clearValidators();
-      direccionControl?.clearValidators();
-    }
-    nombreTiendaControl?.updateValueAndValidity();
-    paisControl?.updateValueAndValidity();
-    departamentoControl?.updateValueAndValidity();
-    ciudadControl?.updateValueAndValidity();
-    barrioControl?.updateValueAndValidity();
-    direccionControl?.updateValueAndValidity();
+    // Ya no hay campos condicionales obligatorios para el registro inicial
+    // Ambos roles (Cliente/Tendero) solo requieren los campos básicos ya definidos.
   }
 
   passwordMatchValidator(g: FormGroup) {
@@ -124,6 +108,58 @@ export class RegisterComponent implements OnInit {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
+  // --- Lógica de Geografía en Cascada ---
+
+  cargarPaises() {
+    this.locationService.getPaises().subscribe((data: any[]) => {
+      this.paises = data;
+      // Seleccionar Colombia por defecto
+      const colombia = this.paises.find(p => p.nombre === 'Colombia');
+      if (colombia) {
+        this.registerForm.patchValue({ pais: colombia.nombre });
+        this.onPaisChange({ target: { value: colombia.nombre } }); // Cargar deptos
+        // Setear código telefónico por defecto si el campo está vacío
+        if (!this.registerForm.get('telefono')?.value) {
+          // Nota: Aquí podrías concatenar el prefijo. Por ahora solo dejamos 'Colombia' seleccionado.
+        }
+      }
+    });
+  }
+
+  onPaisChange(event: any) {
+    // El value del select es el NOMBRE del país (string), pero necesitamos el ID para buscar deptos
+    const nombrePais = event.target.value || event.value; // event.value si es PrimeNG, target.value nativo
+    const paisSeleccionado = this.paises.find(p => p.nombre === nombrePais);
+
+    this.departamentos = [];
+    this.municipios = [];
+    this.registerForm.patchValue({ departamento: '', ciudad: '' }); // Reset hijos
+
+    if (paisSeleccionado) {
+      this.locationService.getDepartamentos(paisSeleccionado.id).subscribe((data: any[]) => {
+        this.departamentos = data;
+        // Auto-select phone code based on country
+        if (paisSeleccionado.codigo) {
+          this.registerForm.patchValue({ codigoPais: paisSeleccionado.codigo });
+        }
+      });
+    }
+  }
+
+  onDepartamentoChange(event: any) {
+    const nombreDepto = event.target.value || event.value;
+    const deptoSeleccionado = this.departamentos.find(d => d.nombre === nombreDepto);
+
+    this.municipios = [];
+    this.registerForm.patchValue({ ciudad: '' }); // Reset ciudad
+
+    if (deptoSeleccionado) {
+      this.locationService.getMunicipios(deptoSeleccionado.id).subscribe((data: any[]) => {
+        this.municipios = data;
+      });
+    }
+  }
+
   register() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -133,27 +169,29 @@ export class RegisterComponent implements OnInit {
     const formValue = this.registerForm.value;
     const rol = formValue.rol;
 
-    // Determinar el endpoint correcto según el rol
+    // Determinar payload común
     let url = '';
+
+    // Concatenar código de país con el teléfono si ambos existen
+    let telefonoFinal = formValue.telefono;
+    if (formValue.codigoPais && formValue.telefono) {
+      telefonoFinal = `${formValue.codigoPais} ${formValue.telefono}`;
+    }
+
     let body: any = {
       nombre: formValue.nombre,
       email: formValue.email,
-      password: formValue.password
+      password: formValue.password,
+      rol: rol, // Importante para el endpoint genérico
+      pais: formValue.pais,
+      ciudad: formValue.ciudad,
+      telefono: telefonoFinal,
+      fechaNacimiento: formValue.fechaNacimiento ? new Date(formValue.fechaNacimiento) : null
     };
 
-    if (rol === 'Tendero') {
-      url = `${environment.apiUrl}Usuarios/register-store`;
-      body = {
-        ...body,
-        nombreTienda: formValue.nombreTienda,
-        pais: formValue.pais,
-        departamento: formValue.departamento,
-        ciudad: formValue.ciudad,
-        barrio: formValue.barrio,
-        direccion: formValue.direccion
-      };
-    } else if (rol === 'Cliente') {
-      url = `${environment.apiUrl}Usuarios/register-client`;
+    // Lógica Simplificada: Todos usan el endpoint genérico /register
+    if (rol === 'Tendero' || rol === 'Cliente') {
+      url = `${environment.apiUrl}Usuarios/register`;
     } else if (rol === 'Admin') {
       url = `${environment.apiUrl}Usuarios/register-admin-temp`;
     } else {
@@ -178,7 +216,11 @@ export class RegisterComponent implements OnInit {
           this.errorType = 'warning';
         } else if (err.status === 400) {
           // Bad Request - Datos inválidos
-          this.errorMsg = err.error?.message || 'Los datos proporcionados no son válidos. Verifica e intenta nuevamente.';
+          if (typeof err.error === 'string') {
+            this.errorMsg = err.error;
+          } else {
+            this.errorMsg = err.error?.message || 'Los datos proporcionados no son válidos. Verifica e intenta nuevamente.';
+          }
           this.errorType = 'error';
         } else if (err.status >= 500) {
           // Error del servidor

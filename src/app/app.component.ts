@@ -7,9 +7,7 @@ import { LoadingComponent } from './components/ui/loading/loading.component';
   standalone: true,
   // Importando LoadingComponent (Standalone)
   imports: [RouterOutlet, LoadingComponent],
-  template: `
-    <app-loading></app-loading>
-    <router-outlet></router-outlet>
-  `,
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
 export class AppComponent { }

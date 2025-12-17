@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
       <div class="flex flex-col items-center">
         <!-- Logo Pulsing -->
         <div class="relative w-32 h-32 animate-pulse">
-           <img src="assets/logo/SFENIX_GC_CON_TEXTO_VERDE.png" alt="Cargando..." class="w-full h-full object-contain drop-shadow-lg">
+           <img src="assets/logo/SBENIX_LOGO_VERDE.png" alt="Cargando..." class="w-full h-full object-contain drop-shadow-lg">
            <!-- Spinner Ring Overlay -->
            <div class="absolute inset-0 border-4 border-[#08d15f] border-t-transparent rounded-full animate-spin"></div>
         </div>

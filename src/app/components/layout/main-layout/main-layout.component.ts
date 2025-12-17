@@ -21,7 +21,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   // Theme & Branding
   isDarkMode: boolean = false;
   // LOGO: Asegúrate de que este archivo exista en src/assets/logo/
-  logoPath: string = 'assets/logo/SFENIX_GC_Verde.png';
+  logoPath: string = 'assets/logo/SBENIX_LOGO_VERDE.png';
   private themeSubscription!: Subscription;
 
   // I18N (Simulado)
@@ -29,7 +29,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   // Datos de usuario simulados/decodificados
   userName: string = 'Usuario';
-  userEmail: string = 'usuario@sfenix.com';
+  userEmail: string = 'usuario@sbenix.com';
   userInitial: string = 'U';
 
   constructor(
@@ -127,14 +127,14 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     const basePath = 'assets/logo/';
 
     // Usar SIEMPRE el logo verde, independientemente del tema (solicitud de usuario)
-    this.logoPath = `${basePath}SFENIX_GC_CON_TEXTO_VERDE.png`;
+    this.logoPath = `${basePath}SBENIX_TEXTO_VERDE.png`;
 
     // if (this.isDarkMode) {
     //   // Modo Oscuro: Logo Blanco
-    //   this.logoPath = `${basePath}SFENIX_GC_CON_TEXTO_BLANCO.png`;
+    //   this.logoPath = `${basePath}SBENIX_TEXTO_BLANCO.png`;
     // } else {
     //   // Modo Claro: Logo Verde
-    //   this.logoPath = `${basePath}SFENIX_GC_CON_TEXTO_VERDE.png`;
+    //   this.logoPath = `${basePath}SBENIX_TEXTO_VERDE.png`;
     // }
   }
 }

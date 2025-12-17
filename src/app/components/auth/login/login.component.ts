@@ -63,7 +63,7 @@ export class LoginComponent implements OnInit {
 
   loginEmail() {
     const payload = { email: this.email, password: this.password };
-    this.http.post('http://localhost:5167/api/Usuarios/login', payload).subscribe({
+    this.http.post('http://localhost:5237/api/Usuarios/login', payload).subscribe({
       next: (response: any) => {
         this.handleLoginSuccess(response);
       },
@@ -76,17 +76,46 @@ export class LoginComponent implements OnInit {
 
   // Lógica centralizada de redirección
   private handleLoginSuccess(response: any) {
-    localStorage.setItem('jwt_token', response.token);
-
-    // Obtener roles del response
     const roles = response.roles || [];
 
-    if (roles.includes('Admin')) {
-      this.router.navigate(['/admin']);
-    } else if (roles.includes('Tendero')) {
+    // --- VALIDACIÓN DE ROL ---
+    // Si estamos en una página específica (loginRole definido), verificar que el usuario tenga ese rol.
+    if (this.loginRole) {
+      const rolEsperado = this.loginRole; // 'Cliente', 'Tendero', 'Admin'
+
+      // Nota: Backend devuelve 'Tendero' pero a veces frontend usa 'Vendedor'? 
+      // Asumiendo consistencia: 'Cliente', 'Tendero', 'Admin'.
+
+      if (!roles.includes(rolEsperado)) {
+        alert(`Error: Esta cuenta no tiene permisos de ${rolEsperado}. Por favor inicia sesión con una cuenta válida.`);
+        // Limpiar lo que se haya podido guardar (aunque localStorage.setItem fue movido abajo)
+        localStorage.removeItem('jwt_token');
+        return; // Detener flujo
+      }
+    }
+    // -------------------------
+
+    // Si pasa la validación, guardar token
+    localStorage.setItem('jwt_token', response.token);
+
+    // Redirección basada en el contexto de la página actual (loginRole)
+    // Esto asegura que si entro por Login Cliente, vaya al Dashboard Cliente (si tengo permiso)
+    // en lugar de saltar al Dashboard Admin por tener ese rol extra.
+    if (this.loginRole === 'Tendero') {
       this.router.navigate(['/tendero']);
-    } else {
+    } else if (this.loginRole === 'Admin') {
+      this.router.navigate(['/admin']);
+    } else if (this.loginRole === 'Cliente') {
       this.router.navigate(['/cliente']);
+    } else {
+      // Fallback: Si no hay contexto definido, usar jerarquía por defecto
+      if (roles.includes('Admin')) {
+        this.router.navigate(['/admin']);
+      } else if (roles.includes('Tendero')) {
+        this.router.navigate(['/tendero']);
+      } else {
+        this.router.navigate(['/cliente']);
+      }
     }
   }
 
