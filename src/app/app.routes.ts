@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { MainLayoutComponent } from './components/layout/main-layout/main-layout.component';
+import { MainLayoutComponent } from './components/layout/main-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { LoginComponent } from './components/auth/login/login.component';
@@ -95,7 +95,7 @@ export const routes: Routes = [
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'Admin' },
         loadComponent: () =>
-          import('./components/pages/dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+          import('./components/pages/dashboards/admin-dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
       },
 
       // 🛡️ PLATAFORMA STORE (TENDERO)
@@ -104,7 +104,7 @@ export const routes: Routes = [
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'Tendero' },
         loadComponent: () =>
-          import('./components/pages/dashboard/vendor-dashboard.component').then((m) => m.VendorDashboardComponent),
+          import('./components/pages/dashboards/vendor-dashboard/vendor-dashboard.component').then((m) => m.VendorDashboardComponent),
       },
 
       // 🛡️ PLATAFORMA CLIENTE
@@ -113,12 +113,24 @@ export const routes: Routes = [
         canActivate: [AuthGuard, RoleGuard],
         data: { role: 'Cliente' },
         loadComponent: () =>
-          import('./components/pages/dashboard/client-dashboard.component').then((m) => m.ClientDashboardComponent),
+          import('./components/pages/dashboards/client-dashboard/client-dashboard.component').then((m) => m.ClientDashboardComponent),
       },
       {
         path: 'dashboard',
         redirectTo: 'client',
         pathMatch: 'full'
+      },
+      {
+        path: 'profile',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./components/pages/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
+        path: 'account-settings',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./components/pages/account-settings/account-settings.component').then((m) => m.AccountSettingsComponent),
       }
     ],
   },

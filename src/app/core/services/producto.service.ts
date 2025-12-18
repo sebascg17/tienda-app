@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { Categoria } from './categoria.service';
 
 export interface Producto {
@@ -40,5 +40,9 @@ export class ProductoService {
 
   eliminarProducto(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getProductosDestacados(): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.apiUrl}/destacados`);
   }
 }

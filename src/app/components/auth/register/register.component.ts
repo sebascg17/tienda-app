@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
-import { environment } from '../../../../environments/environment';
 import { LocationService } from '../../../core/services/location.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -17,12 +17,12 @@ import { LocationService } from '../../../core/services/location.service';
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   errorMsg = '';
-  errorType: 'error' | 'warning' = 'error'; // Tipo de error para estilos
+  errorType: 'error' | 'warning' = 'error';
   showPassword = false;
   showConfirmPassword = false;
-  isRoleFixed = false; // Nueva propiedad
-  loginLink = '/login'; // Link dinámico de login
-  registerRole = 'Cliente'; // Rol del registro (Cliente, Tendero, Admin)
+  isRoleFixed = false;
+  loginLink = '/login';
+  registerRole = 'Cliente';
 
   // Listas para selectores geográficos
   paises: any[] = [];
@@ -31,40 +31,24 @@ export class RegisterComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private router: Router,
-    private route: ActivatedRoute, // Inyectar ActivatedRoute
-    private locationService: LocationService
+    private route: ActivatedRoute,
+    private locationService: LocationService,
+    private authService: AuthService // Inyectamos el servicio corregido
   ) { }
 
   ngOnInit(): void {
     this.initForm();
-    this.cargarPaises(); // Cargar países al iniciar
+    this.cargarPaises();
 
-    // Verificar si hay un rol predefinido en la ruta (data)
     this.route.data.subscribe(data => {
       if (data['role']) {
         this.isRoleFixed = true;
-        this.registerRole = data['role']; // Actualizar registerRole
+        this.registerRole = data['role'];
         this.registerForm.patchValue({ rol: data['role'] });
-        this.updateValidators(data['role']);
-
-        // Actualizar el link de login según el rol
         this.updateLoginLink(data['role']);
       }
     });
-  }
-
-  updateLoginLink(role: string) {
-    if (role === 'Tendero') {
-      this.loginLink = '/store/login';
-    } else if (role === 'Cliente') {
-      this.loginLink = '/client/login';
-    } else if (role === 'Admin') {
-      this.loginLink = '/admin/login';
-    } else {
-      this.loginLink = '/login';
-    }
   }
 
   initForm() {
@@ -74,8 +58,6 @@ export class RegisterComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
       rol: ['Cliente', [Validators.required]],
-
-      // Campos Comunes (Paso 1 - Simplificado)
       pais: ['', [Validators.required]],
       departamento: ['', [Validators.required]],
       ciudad: ['', [Validators.required]],
@@ -83,62 +65,48 @@ export class RegisterComponent implements OnInit {
       telefono: [''],
       fechaNacimiento: ['']
     }, { validators: this.passwordMatchValidator });
-
-    // Escuchar cambios en el rol para validaciones dinámicas
-    this.registerForm.get('rol')?.valueChanges.subscribe(rol => {
-      this.updateValidators(rol);
-    });
   }
 
-  updateValidators(rol: string) {
-    // Ya no hay campos condicionales obligatorios para el registro inicial
-    // Ambos roles (Cliente/Tendero) solo requieren los campos básicos ya definidos.
-  }
-
+  // --- Lógica de Ayuda ---
   passwordMatchValidator(g: FormGroup) {
     return g.get('password')?.value === g.get('confirmPassword')?.value
       ? null : { mismatch: true };
   }
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
+  updateLoginLink(role: string) {
+    const links: { [key: string]: string } = {
+      'Tendero': '/store/login',
+      'Cliente': '/client/login',
+      'Admin': '/admin/login'
+    };
+    this.loginLink = links[role] || '/login';
   }
 
-  toggleConfirmPassword() {
-    this.showConfirmPassword = !this.showConfirmPassword;
-  }
+  togglePassword() { this.showPassword = !this.showPassword; }
+  toggleConfirmPassword() { this.showConfirmPassword = !this.showConfirmPassword; }
 
-  // --- Lógica de Geografía en Cascada ---
-
+  // --- Lógica de Geografía ---
   cargarPaises() {
     this.locationService.getPaises().subscribe((data: any[]) => {
       this.paises = data;
-      // Seleccionar Colombia por defecto
       const colombia = this.paises.find(p => p.nombre === 'Colombia');
       if (colombia) {
         this.registerForm.patchValue({ pais: colombia.nombre });
-        this.onPaisChange({ target: { value: colombia.nombre } }); // Cargar deptos
-        // Setear código telefónico por defecto si el campo está vacío
-        if (!this.registerForm.get('telefono')?.value) {
-          // Nota: Aquí podrías concatenar el prefijo. Por ahora solo dejamos 'Colombia' seleccionado.
-        }
+        this.onPaisChange({ target: { value: colombia.nombre } });
       }
     });
   }
 
   onPaisChange(event: any) {
-    // El value del select es el NOMBRE del país (string), pero necesitamos el ID para buscar deptos
-    const nombrePais = event.target.value || event.value; // event.value si es PrimeNG, target.value nativo
+    const nombrePais = event.target.value;
     const paisSeleccionado = this.paises.find(p => p.nombre === nombrePais);
-
     this.departamentos = [];
     this.municipios = [];
-    this.registerForm.patchValue({ departamento: '', ciudad: '' }); // Reset hijos
+    this.registerForm.patchValue({ departamento: '', ciudad: '' });
 
     if (paisSeleccionado) {
       this.locationService.getDepartamentos(paisSeleccionado.id).subscribe((data: any[]) => {
         this.departamentos = data;
-        // Auto-select phone code based on country
         if (paisSeleccionado.codigo) {
           this.registerForm.patchValue({ codigoPais: paisSeleccionado.codigo });
         }
@@ -147,11 +115,10 @@ export class RegisterComponent implements OnInit {
   }
 
   onDepartamentoChange(event: any) {
-    const nombreDepto = event.target.value || event.value;
+    const nombreDepto = event.target.value;
     const deptoSeleccionado = this.departamentos.find(d => d.nombre === nombreDepto);
-
     this.municipios = [];
-    this.registerForm.patchValue({ ciudad: '' }); // Reset ciudad
+    this.registerForm.patchValue({ ciudad: '' });
 
     if (deptoSeleccionado) {
       this.locationService.getMunicipios(deptoSeleccionado.id).subscribe((data: any[]) => {
@@ -160,6 +127,7 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  // --- REGISTRO FINAL ---
   register() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -167,77 +135,43 @@ export class RegisterComponent implements OnInit {
     }
 
     const formValue = this.registerForm.value;
-    const rol = formValue.rol;
-
-    // Determinar payload común
-    let url = '';
-
-    // Concatenar código de país con el teléfono si ambos existen
-    let telefonoFinal = formValue.telefono;
-    if (formValue.codigoPais && formValue.telefono) {
-      telefonoFinal = `${formValue.codigoPais} ${formValue.telefono}`;
-    }
-
-    let body: any = {
+    const body = {
       nombre: formValue.nombre,
       email: formValue.email,
       password: formValue.password,
-      rol: rol, // Importante para el endpoint genérico
+      rol: formValue.rol,
       pais: formValue.pais,
       ciudad: formValue.ciudad,
-      telefono: telefonoFinal,
+      telefono: `${formValue.codigoPais} ${formValue.telefono}`,
       fechaNacimiento: formValue.fechaNacimiento ? new Date(formValue.fechaNacimiento) : null
     };
 
-    // Lógica Simplificada: Todos usan el endpoint genérico /register
-    if (rol === 'Tendero' || rol === 'Cliente') {
-      url = `${environment.apiUrl}Usuarios/register`;
-    } else if (rol === 'Admin') {
-      url = `${environment.apiUrl}Usuarios/register-admin-temp`;
-    } else {
-      this.errorMsg = 'Rol no válido';
-      return;
-    }
+    const isAdmin = formValue.rol === 'Admin';
 
-    console.log('Enviando registro a:', url, body);
-
-    this.http.post(url, body).subscribe({
+    this.authService.register(body, isAdmin).subscribe({
       next: (res) => {
-        console.log('Registro exitoso:', res);
+        console.log('Registro exitoso', res);
         this.router.navigate([this.loginLink]);
       },
-      error: (err) => {
-        console.error('Error en registro:', err);
-
-        // Manejo específico de errores
-        if (err.status === 409 || (err.error && err.error.includes && err.error.includes('ya existe'))) {
-          // Usuario ya existe
-          this.errorMsg = '⚠️ Este correo electrónico ya está registrado. Por favor, inicia sesión o usa otro correo.';
-          this.errorType = 'warning';
-        } else if (err.status === 400) {
-          // Bad Request - Datos inválidos
-          if (typeof err.error === 'string') {
-            this.errorMsg = err.error;
-          } else {
-            this.errorMsg = err.error?.message || 'Los datos proporcionados no son válidos. Verifica e intenta nuevamente.';
-          }
-          this.errorType = 'error';
-        } else if (err.status >= 500) {
-          // Error del servidor
-          this.errorMsg = '🔧 Error del sistema. Por favor, contacta al desarrollador o intenta más tarde.';
-          this.errorType = 'error';
-        } else if (err.error && typeof err.error === 'string') {
-          this.errorMsg = err.error;
-          this.errorType = 'error';
-        } else if (err.error && err.error.message) {
-          this.errorMsg = err.error.message;
-          this.errorType = 'error';
-        } else {
-          this.errorMsg = 'No se pudo completar el registro. Intenta nuevamente.';
-          this.errorType = 'error';
-        }
-      }
+      error: (err) => this.handleRegisterError(err)
     });
+  }
+
+  // --- MANEJO DE ERRORES CENTRALIZADO ---
+  private handleRegisterError(err: any) {
+    console.error('Error en registro:', err);
+    this.errorType = 'error';
+
+    if (err.status === 409) {
+      this.errorMsg = '⚠️ Este correo electrónico ya está registrado.';
+      this.errorType = 'warning';
+    } else if (err.status === 400) {
+      this.errorMsg = err.error?.message || 'Datos inválidos. Verifica los campos.';
+    } else if (err.status >= 500) {
+      this.errorMsg = '🔧 Error del sistema. Intenta más tarde.';
+    } else {
+      this.errorMsg = 'No se pudo completar el registro.';
+    }
   }
 
   // Getters para el template

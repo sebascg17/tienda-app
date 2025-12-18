@@ -1,0 +1,14 @@
+<div class="flex items-center justify-center" [ngClass]="sizeClasses">
+  <!-- Si hay foto, mostrar imagen -->
+  <img 
+    *ngIf="photoUrl" 
+    [src]="photoUrl" 
+    [alt]="name"
+    class="w-full h-full object-cover rounded-full"
+  />
+  
+  <!-- Si no hay foto, mostrar inicial -->
+  <span *ngIf="!photoUrl" class="text-white font-bold" [ngClass]="textSizeClass">
+    {{ initial }}
+  </span>
+</div>

@@ -1,104 +1,185 @@
-<!-- Hero Section con imagen de fondo -->
-<div
-  class="relative bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden transition-colors duration-300">
-  <!-- Imagen de fondo con overlay -->
-  <div class="absolute inset-0 z-0">
-    <img src="assets/img/Banner-SBENIX-3.png" alt="SBENIX Dashboard Preview"
-      class="w-full h-full object-cover object-center opacity-4 dark:opacity-20">
-    <div
-      class="absolute inset-0 bg-gradient-to-r from-white/98 via-white/90 to-white/70 dark:from-gray-900/95 dark:via-gray-900/70 dark:to-transparent">
+<!-- VISTA 1: NO AUTENTICADO - Landing Page -->
+<div *ngIf="!isAuthenticated">
+  <!-- Hero Section con imagen de fondo -->
+  <div
+    class="relative bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden transition-colors duration-300">
+    <!-- Imagen de fondo con overlay -->
+    <div class="absolute inset-0 z-0">
+      <img src="assets/img/Banner-SBENIX-3.png" alt="SBENIX Dashboard Preview"
+        class="w-full h-full object-cover object-center opacity-20 dark:opacity-20">
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-white/98 via-white/90 to-white/70 dark:from-gray-900/95 dark:via-gray-900/70 dark:to-transparent">
+      </div>
     </div>
-  </div>
 
-  <!-- Contenido del Hero -->
-  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="py-20 sm:py-24 lg:py-32">
-      <div class="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
-        <!-- Texto (Ocupa 7 columnas) -->
-        <div class="lg:col-span-7">
-          <h1
-            class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
-            <span class="block">Tu tienda online</span>
-            <span class="block text-[#08d15f]">potencia tu negocio</span>
-          </h1>
-          <p class="mt-3 text-base text-gray-600 dark:text-gray-300 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl max-w-2xl">
-            SBENIX es la plataforma todo en uno para gestionar tus ventas, pedidos y clientes. Únete a miles de
-            emprendedores que ya están creciendo con nosotros.
-          </p>
-
-
-          <!-- Llamado a la acción como texto -->
-          <div class="mt-6">
-            <p class="text-2xl sm:text-3xl font-bold text-[#08d15f] dark:text-[#08d15f]">
-              ¡Comenzar es Gratis!
+    <!-- Contenido del Hero -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-20 sm:py-24 lg:py-32">
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+          <!-- Texto (Ocupa 7 columnas) -->
+          <div class="lg:col-span-7">
+            <h1
+              class="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
+              <span class="block">{{ 'home.title' | translate }}</span>
+              <span class="block text-[#08d15f]">{{ 'home.subtitle' | translate }}</span>
+            </h1>
+            <p class="mt-3 text-base text-gray-600 dark:text-gray-300 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl max-w-2xl">
+              {{ 'home.description' | translate }}
             </p>
+
+            <!-- Llamado a la acción como texto -->
+            <div class="mt-6">
+              <p class="text-2xl sm:text-3xl font-bold text-[#08d15f] dark:text-[#08d15f]">
+                {{ 'home.callToAction' | translate }}
+              </p>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="mt-6 sm:flex sm:gap-4">
+              <div class="rounded-md shadow">
+                <a routerLink="/client/login"
+                  class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#08d15f] hover:bg-green-600 md:py-4 md:text-lg transition-all hover:scale-105">
+                  {{ 'home.buyButton' | translate }}
+                </a>
+              </div>
+              <div class="mt-3 sm:mt-0 rounded-md shadow">
+                <a routerLink="/store/login"
+                  class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-[#08d15f] bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 md:py-4 md:text-lg transition-all hover:scale-105">
+                  {{ 'home.sellButton' | translate }}
+                </a>
+              </div>
+            </div>
           </div>
 
-          <!-- Botones de acción -->
-          <div class="mt-6 sm:flex sm:gap-4">
-            <div class="rounded-md shadow">
-              <a routerLink="/client/login"
-                class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#08d15f] hover:bg-green-600 md:py-4 md:text-lg transition-all hover:scale-105">
-                Soy Cliente
-              </a>
-            </div>
-            <div class="mt-3 sm:mt-0 rounded-md shadow">
-              <a routerLink="/store/login"
-                class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-[#08d15f] bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 md:py-4 md:text-lg transition-all hover:scale-105">
-                Soy Vendedor
-              </a>
-            </div>
+          <!-- Espacio para la imagen (Ocupa 5 columnas) -->
+          <div class="hidden lg:block lg:col-span-5">
+            <!-- Espacio vacío para balance visual -->
           </div>
-        </div>
-
-        <!-- Espacio para la imagen (Ocupa 5 columnas) - La imagen está de fondo -->
-        <div class="hidden lg:block lg:col-span-5">
-          <!-- Espacio vacío para balance visual -->
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Sección de Beneficios -->
+  <div class="py-12 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:text-center">
+        <h2 class="text-base text-[#08d15f] font-semibold tracking-wide uppercase">{{ 'home.benefits' | translate }}</h2>
+        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          {{ 'home.betterWay' | translate }}
+        </p>
+      </div>
+
+      <div class="mt-10">
+        <dl class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+          <!-- Vendedores -->
+          <div class="relative">
+            <dt>
+              <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-[#08d15f] text-white">
+                <i class="pi pi-briefcase text-xl"></i>
+              </div>
+              <p class="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-white">{{ 'home.forSellers' | translate }}</p>
+            </dt>
+            <dd class="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">
+              {{ 'home.sellersBenefit' | translate }}
+            </dd>
+          </div>
+
+          <!-- Clientes -->
+          <div class="relative">
+            <dt>
+              <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-[#08d15f] text-white">
+                <i class="pi pi-users text-xl"></i>
+              </div>
+              <p class="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-white">{{ 'home.forClients' | translate }}</p>
+            </dt>
+            <dd class="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">
+              {{ 'home.clientsBenefit' | translate }}
+            </dd>
+          </div>
+      </dl>
+    </div>
+  </div>
+</div>
 </div>
 
-<!-- Sección de Beneficios -->
-<div class="py-12 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="lg:text-center">
-      <h2 class="text-base text-[#08d15f] font-semibold tracking-wide uppercase">Beneficios</h2>
-      <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-        Una mejor forma de vender
+<!-- VISTA 2: AUTENTICADO - Resumen de Productos Destacados -->
+<div *ngIf="isAuthenticated" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        {{ 'home.featuredProducts' | translate }}
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">
+        {{ 'home.featuredProductsDescription' | translate }}
       </p>
     </div>
+  </div>
 
-    <div class="mt-10">
-      <dl class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-        <!-- Vendedores -->
-        <div class="relative">
-          <dt>
-            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-[#08d15f] text-white">
-              <i class="pi pi-briefcase text-xl"></i>
-            </div>
-            <p class="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-white">Para Vendedores</p>
-          </dt>
-          <dd class="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">
-            Crea tu catálogo en minutos, gestiona pedidos en tiempo real y recibe pagos directamente a tu cuenta. Sin
-            comisiones ocultas.
-          </dd>
+  <!-- Contenido -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Estado: Cargando -->
+    <div *ngIf="isLoading" class="flex justify-center items-center min-h-64">
+      <div class="text-center">
+        <div class="inline-block animate-spin">
+          <i class="pi pi-spinner text-4xl text-[#08d15f]"></i>
+        </div>
+        <p class="text-gray-600 dark:text-gray-400 mt-4">{{ 'messages.loading' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Grid de Productos -->
+    <div *ngIf="!isLoading && productoDestacados.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let producto of productoDestacados" 
+        class="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden cursor-pointer"
+        (click)="viewProduct(producto.id)">
+        
+        <!-- Imagen -->
+        <div class="h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+          <img *ngIf="producto.imagen" [src]="producto.imagen" [alt]="producto.nombre" 
+            class="w-full h-full object-cover hover:scale-105 transition-transform">
+          <div *ngIf="!producto.imagen" class="w-full h-full flex items-center justify-center text-gray-400">
+            <i class="pi pi-image text-4xl"></i>
+          </div>
         </div>
 
-        <!-- Clientes -->
-        <div class="relative">
-          <dt>
-            <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-[#08d15f] text-white">
-              <i class="pi pi-users text-xl"></i>
-            </div>
-            <p class="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-white">Para Clientes</p>
-          </dt>
-          <dd class="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">
-            Descubre productos únicos, realiza compras seguras y sigue el estado de tus pedidos desde tu perfil.
-          </dd>
+        <!-- Información -->
+        <div class="p-4">
+          <!-- Nombre -->
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
+            {{ producto.nombre }}
+          </h3>
+
+          <!-- Categoría -->
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {{ producto.categoria?.nombre || 'Sin categoría' }}
+          </p>
+
+          <!-- Precio -->
+          <div class="mt-4 flex items-center justify-between">
+            <span class="text-2xl font-bold text-[#08d15f]">
+              ${{ producto.precio | number: '1.0-2' }}
+            </span>
+            <span class="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 px-2 py-1 rounded">
+              {{ producto.stock }} disponibles
+            </span>
+          </div>
+
+          <!-- Botón -->
+          <button class="mt-4 w-full bg-[#08d15f] hover:bg-green-600 text-white font-medium py-2 rounded-lg transition-colors">
+            {{ 'home.viewDetails' | translate }}
+          </button>
         </div>
-      </dl>
+      </div>
+    </div>
+
+    <!-- Estado: Sin productos -->
+    <div *ngIf="!isLoading && productoDestacados.length === 0" class="text-center py-12">
+      <i class="pi pi-inbox text-5xl text-gray-400 mb-4"></i>
+      <p class="text-gray-600 dark:text-gray-400 text-lg">
+        {{ 'messages.noProducts' | translate }}
+      </p>
     </div>
   </div>
 </div>

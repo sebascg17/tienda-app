@@ -6,12 +6,8 @@ import { Categoria, CategoriaService } from '../../../core/services/categoria.se
   selector: 'app-categorias',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <h2>Categorías</h2>
-    <ul>
-      <li *ngFor="let cat of categorias">{{ cat.nombre }}</li>
-    </ul>
-  `
+  templateUrl: './categorias.component.html',
+  styleUrl: './categorias.component.css'
 })
 export class CategoriasComponent implements OnInit {
   categorias: Categoria[] = [];
