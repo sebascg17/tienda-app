@@ -1,0 +1,187 @@
+<div class="max-w-4xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ 'profile.title' | translate }}</h1>
+    <p class="text-gray-600 dark:text-gray-400 mt-2">Gestiona tu información personal, ubicación y seguridad desde un
+      solo lugar.</p>
+  </div>
+
+  <div
+    class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+    <!-- Tabs Header -->
+    <div class="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+      <button (click)="switchTab('general')"
+        [ngClass]="activeTab === 'general' ? 'border-[#08d15f] text-[#08d15f] bg-white dark:bg-gray-800' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+        class="flex-1 py-4 px-6 text-center font-medium border-b-2 transition-all duration-200">
+        <i class="pi pi-user mr-2"></i> General
+      </button>
+      <button (click)="switchTab('location')"
+        [ngClass]="activeTab === 'location' ? 'border-[#08d15f] text-[#08d15f] bg-white dark:bg-gray-800' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+        class="flex-1 py-4 px-6 text-center font-medium border-b-2 transition-all duration-200">
+        <i class="pi pi-map-marker mr-2"></i> Ubicación
+      </button>
+      <button (click)="switchTab('security')"
+        [ngClass]="activeTab === 'security' ? 'border-[#08d15f] text-[#08d15f] bg-white dark:bg-gray-800' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'"
+        class="flex-1 py-4 px-6 text-center font-medium border-b-2 transition-all duration-200">
+        <i class="pi pi-lock mr-2"></i> Seguridad
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-8">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#08d15f] mb-4"></div>
+        <p class="text-gray-500 dark:text-gray-400">Cargando tu configuración...</p>
+      </div>
+
+      <div *ngIf="!isLoading">
+        <!-- GENERAL TAB -->
+        <div *ngIf="activeTab === 'general'" class="space-y-8 animate-fade-in">
+          <!-- Photo Section -->
+          <div
+            class="flex flex-col items-center sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-8 pb-8 border-b border-gray-100 dark:border-gray-700">
+            <div class="relative group">
+              <app-avatar [photoUrl]="previewPhoto || profilePhoto" [name]="userFirstName" [size]="'large'"></app-avatar>
+              <label for="photo-upload"
+                class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200">
+                <i class="pi pi-camera text-2xl text-white"></i>
+              </label>
+              <input type="file" id="photo-upload" class="hidden" (change)="onPhotoSelected($event)" accept="image/*">
+            </div>
+            <div class="flex-1 text-center sm:text-left">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Foto de Perfil</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Sube una imagen clara para que otros te
+                reconozcan.</p>
+              <div *ngIf="previewPhoto" class="mt-4 flex space-x-3 justify-center sm:justify-start">
+                <button (click)="cancelPhotoChange()"
+                  class="text-sm text-red-500 hover:text-red-600 font-medium">Cancelar</button>
+                <span class="text-gray-300">|</span>
+                <span class="text-sm text-[#08d15f] font-medium italic">Nueva foto seleccionada</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Basic Info Form -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
+              <input type="text" [(ngModel)]="userFirstName"
+                [ngClass]="{'border-red-500 ring-red-100': !userFirstName && isSavingAttempted}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellido</label>
+              <input type="text" [(ngModel)]="userLastName"
+                [ngClass]="{'border-red-500 ring-red-100': !userLastName && isSavingAttempted}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+              <input type="email" [(ngModel)]="userEmail" readonly
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 text-gray-500 cursor-not-allowed">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha de Nacimiento</label>
+              <input type="date" [(ngModel)]="birthDate"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+            </div>
+          </div>
+        </div>
+
+        <!-- LOCATION TAB -->
+        <div *ngIf="activeTab === 'location'" class="space-y-6 animate-fade-in">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
+              <div class="flex">
+                <span
+                  class="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 text-gray-500 font-medium">+57</span>
+                <input type="tel" [(ngModel)]="phoneNumber"
+                  class="flex-1 px-4 py-3 rounded-r-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">País</label>
+              <select [(ngModel)]="selectedCountry" (change)="onCountryChange()"
+                [ngClass]="{'border-red-500 ring-red-100': !selectedCountry && isSavingAttempted}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+                <option value="">Selecciona un país</option>
+                <option *ngFor="let c of countries" [value]="c.id">{{c.nombre}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+              <select [(ngModel)]="selectedState" (change)="onStateChange()" [disabled]="!selectedCountry"
+                [ngClass]="{'border-red-500 ring-red-100': !selectedState && isSavingAttempted}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all disabled:opacity-50">
+                <option value="">Selecciona un departamento</option>
+                <option *ngFor="let s of states" [value]="s.id">{{s.nombre}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ciudad</label>
+              <select [(ngModel)]="selectedCity" [disabled]="!selectedState"
+                [ngClass]="{'border-red-500 ring-red-100': !selectedCity && isSavingAttempted}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all disabled:opacity-50">
+                <option value="">Selecciona una ciudad</option>
+                <option *ngFor="let ci of cities" [value]="ci.id">{{ci.nombre}}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Barrio</label>
+              <input type="text" [(ngModel)]="neighborhood" placeholder="Ej: Chapinero"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dirección Detallada</label>
+              <input type="text" [(ngModel)]="address" placeholder="Calle 123 #45-67"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECURITY TAB -->
+        <div *ngIf="activeTab === 'security'" class="max-w-md mx-auto space-y-6 animate-fade-in">
+          <div
+            class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start space-x-3 mb-4">
+            <i class="pi pi-info-circle text-blue-500 mt-1"></i>
+            <p class="text-sm text-blue-700 dark:text-blue-300">Asegúrate de cambiar tu contraseña periódicamente para
+              mantener tu cuenta segura.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña Actual</label>
+            <input type="password" [(ngModel)]="currentPassword"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nueva Contraseña</label>
+            <input type="password" [(ngModel)]="newPassword"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirmar Nueva
+              Contraseña</label>
+            <input type="password" [(ngModel)]="confirmPassword"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#08d15f] transition-all">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-12 flex items-center justify-end space-x-4 pt-8 border-t border-gray-100 dark:border-gray-700">
+          <button (click)="isLoading = true; ngOnInit()"
+            class="px-6 py-3 text-gray-600 dark:text-gray-400 font-medium hover:text-gray-900 dark:hover:text-white transition-colors">
+            Descartar
+          </button>
+          <button (click)="saveChanges()" [disabled]="isSaving || isUploading"
+            class="px-10 py-3 bg-[#08d15f] hover:bg-[#07b552] text-white font-bold rounded-xl shadow-lg shadow-[#08d15f]/20 transform hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+            <span *ngIf="!isSaving && !isUploading">Guardar Cambios</span>
+            <span *ngIf="isSaving || isUploading" class="flex items-center">
+              <i class="pi pi-spin pi-spinner mr-2"></i> Procesando...
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

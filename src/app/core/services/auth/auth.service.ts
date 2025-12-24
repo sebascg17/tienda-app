@@ -44,7 +44,6 @@ export class AuthService {
     );
   }
 
-  // Actualizar perfil del usuario autenticado
   updateMyProfile(profileData: any) {
     const token = localStorage.getItem('jwt_token');
     let headers = new HttpHeaders();
@@ -59,6 +58,18 @@ export class AuthService {
         }
       })
     );
+  }
+
+  // Subir foto de perfil
+  uploadPhoto(file: File): Observable<any> {
+    const token = localStorage.getItem('jwt_token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    const formData = new FormData();
+    formData.append('foto', file);
+    return this.http.post<any>(`${this.API_URL}/me/photo`, formData, { headers });
   }
 
   // Login Local (DB)

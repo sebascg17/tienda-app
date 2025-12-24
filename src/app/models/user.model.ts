@@ -18,6 +18,12 @@ export interface User {
   photoUrl: string | null;
   roles: string[];
   fechaNacimiento?: Date;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  departamento?: string;
+  pais?: string;
+  barrio?: string;
   isAuthenticated: boolean;
 }
 
@@ -37,6 +43,12 @@ export function buildUserFromTokenPayload(payload: any): User {
       (Array.isArray(payload.roles) ? payload.roles : [payload.roles])
       : [],
     fechaNacimiento: payload.fechaNacimiento ? new Date(payload.fechaNacimiento) : undefined,
+    telefono: payload.telefono,
+    direccion: payload.direccion,
+    ciudad: payload.ciudad,
+    departamento: payload.departamento,
+    pais: payload.pais,
+    barrio: payload.barrio,
     isAuthenticated: true
   };
 }
@@ -63,6 +75,12 @@ export function buildUserFromDto(dto: UsuarioReadDto): User {
     photoUrl: formatPhotoUrl(dto.photoUrl),
     roles: dto.roles,
     fechaNacimiento: dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined,
+    telefono: dto.telefono,
+    direccion: dto.direccion,
+    ciudad: dto.ciudad,
+    departamento: dto.departamento,
+    pais: dto.pais,
+    barrio: dto.barrio,
     isAuthenticated: true
   };
 }

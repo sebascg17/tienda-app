@@ -16,6 +16,12 @@ export interface UsuarioReadDto {
   roles: string[];
   fechaCreacion: Date;
   fechaNacimiento?: Date;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  departamento?: string;
+  pais?: string;
+  barrio?: string;
 }
 
 /**
@@ -32,6 +38,8 @@ export interface UsuarioUpdateDto {
   ciudad?: string;
   direccion?: string;
   telefono?: string;
+  departamento?: string;
+  barrio?: string;
 }
 
 /**

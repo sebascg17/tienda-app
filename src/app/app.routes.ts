@@ -121,16 +121,20 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'profile',
+        path: 'profile-settings',
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import('./components/pages/profile/profile.component').then((m) => m.ProfileComponent),
+          import('./components/pages/profile-settings/profile-settings.component').then((m) => m.ProfileSettingsComponent),
+      },
+      {
+        path: 'profile',
+        redirectTo: 'profile-settings',
+        pathMatch: 'full'
       },
       {
         path: 'account-settings',
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('./components/pages/account-settings/account-settings.component').then((m) => m.AccountSettingsComponent),
+        redirectTo: 'profile-settings',
+        pathMatch: 'full'
       }
     ],
   },

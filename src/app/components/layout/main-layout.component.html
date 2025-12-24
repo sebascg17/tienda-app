@@ -92,15 +92,10 @@
 
               <!-- Account Options -->
               <div class="py-2 border-b border-gray-200 dark:border-gray-700">
-                <a routerLink="/profile" (click)="isDrawerOpen = false"
-                  class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <i class="pi pi-user text-[#08d15f]"></i>
-                  <span>{{ 'profile.editProfile' | translate }}</span>
-                </a>
-                <a routerLink="/account-settings" (click)="isDrawerOpen = false"
+                <a routerLink="/profile-settings" (click)="isDrawerOpen = false"
                   class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <i class="pi pi-cog text-[#08d15f]"></i>
-                  <span>{{ 'common.settings' | translate }}</span>
+                  <span>{{ 'profile.accountSettings' | translate }}</span>
                 </a>
               </div>
 

@@ -1,0 +1,28 @@
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom focus ring color to match Sbenix brand */
+.focus\:ring-\[\#08d15f\]:focus {
+  --tw-ring-color: #08d15f;
+  border-color: #08d15f;
+}
+
+/* Glassmorphism for inputs in dark mode */
+.dark input:focus,
+.dark select:focus {
+  background-color: rgba(55, 65, 81, 0.8);
+  backdrop-filter: blur(8px);
+}
