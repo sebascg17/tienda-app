@@ -1,14 +1,17 @@
-<div class="flex items-center justify-center" [ngClass]="sizeClasses">
-  <!-- Si hay foto, mostrar imagen -->
+<div class="flex items-center justify-center p-0 overflow-hidden" [ngClass]="sizeClasses" [ngStyle]="{'background-color': photoUrl && photoLoaded ? 'transparent' : computedBackgroundColor}">
+  <!-- Imagen de perfil: se oculta con [hidden] hasta que cargue para evitar el "salto" visual -->
   <img 
     *ngIf="photoUrl" 
     [src]="photoUrl" 
     [alt]="name"
     class="w-full h-full object-cover rounded-full"
+    (load)="onPhotoLoaded()"
+    (error)="onPhotoError()"
+    [hidden]="!photoLoaded"
   />
   
-  <!-- Si no hay foto, mostrar inicial -->
-  <span *ngIf="!photoUrl" class="text-white font-bold" [ngClass]="textSizeClass">
+  <!-- Iniciales: solo se muestran si no hay foto o si la foto aún no ha cargado -->
+  <span *ngIf="!photoUrl || !photoLoaded" class="text-white font-bold" [ngClass]="textSizeClass">
     {{ initial }}
   </span>
 </div>

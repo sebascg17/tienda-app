@@ -1,16 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { AuthService } from '../../core/services/auth/auth.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { AvatarComponent } from '../ui/avatar/avatar.component';
 import { Subscription } from 'rxjs';
+import { NotificationComponent } from '../ui/notification/notification.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, TranslatePipe, AvatarComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, TranslatePipe, AvatarComponent, NotificationComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
@@ -31,22 +33,25 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   // I18N (Simulado)
   currentLang: string = 'ES';
 
-  // Datos de usuario simulados/decodificados
-  userName: string = 'Usuario';
-  userEmail: string = 'usuario@sbenix.com';
-  userInitial: string = 'U';
+  // Perfil del usuario reactivo
+  private userSubscription!: Subscription;
   userPhotoUrl: string | null = null;
-  userRole: string = 'Cliente'; // Default role
+  userRole: string = 'Cliente';
+  userName: string = 'Usuario';
+  userLastName: string = '';
+  userEmail: string = '';
+  userInitial: string = 'U';
+  dashboardLink: string = '/client';
 
   constructor(
     private router: Router,
     private themeService: ThemeService,
-    private i18nService: I18nService
+    private i18nService: I18nService,
+    private authService: AuthService,
+    private el: ElementRef
   ) { }
 
   ngOnInit(): void {
-    this.checkLoginStatus();
-
     // Cargar idioma guardado
     this.currentLang = this.i18nService.getCurrentLanguage();
 
@@ -61,22 +66,50 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       this._updateLogoPath();
     });
 
-    // Escuchar evento personalizado cuando se actualiza el perfil
-    window.addEventListener('profileUpdated', (event: any) => {
-      if (this.isAuthenticated && event.detail?.profilePhotoUrl) {
-        this.userPhotoUrl = event.detail.profilePhotoUrl;
+    // Suscribirse al estado del usuario (Centralizado en AuthService)
+    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.isAuthenticated = user.isAuthenticated;
+        this.userName = user.nombre || 'Usuario';
+        this.userLastName = user.apellido || '';
+        this.userEmail = user.email || '';
+
+        // Determinar rol (el primero en la lista o Cliente)
+        this.userRole = user.roles && user.roles.length > 0 ? user.roles[0] : 'Cliente';
+
+        // Link de dashboard según rol
+        if (user.roles?.includes('Admin')) {
+          this.dashboardLink = '/admin';
+        } else if (user.roles?.includes('Tendero')) {
+          this.dashboardLink = '/store';
+        } else {
+          this.dashboardLink = '/client';
+        }
+
+        // Manejar URL de la foto
+        if (user.photoUrl) {
+          this.userPhotoUrl = user.photoUrl.startsWith('http')
+            ? user.photoUrl
+            : `http://localhost:5237${user.photoUrl}`;
+        } else {
+          this.userPhotoUrl = null;
+        }
+
+        this.userInitial = (this.userName[0] || 'U').toUpperCase();
+        console.log('UI sincronizada reactivamente:', user);
+      } else {
+        this.isAuthenticated = false;
+        this.userName = 'Usuario';
+        this.userLastName = '';
+        this.userPhotoUrl = null;
+        this.userRole = 'Cliente';
       }
     });
 
-    // Escuchar cambios en sessionStorage (foto temporal durante la sesión)
-    window.addEventListener('storage', () => {
-      if (this.isAuthenticated) {
-        const sessionPhoto = sessionStorage.getItem('user_profile_photo');
-        if (sessionPhoto) {
-          this.userPhotoUrl = sessionPhoto;
-        }
-      }
-    });
+    // Cargar datos frescos del servidor al iniciar
+    if (localStorage.getItem('jwt_token')) {
+      this.authService.getMe().subscribe();
+    }
   }
 
   changeLanguage(lang: string) {
@@ -89,101 +122,35 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     if (this.themeSubscription) {
       this.themeSubscription.unsubscribe();
     }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
-  // 2. Lógica de Autenticación
-  dashboardLink: string = '/cliente'; // Default
+  // Eliminados métodos internos redundantes, ahora controlados por AuthService
+  checkLoginStatus() { }
+  private loadUserProfile(): void { }
 
-  checkLoginStatus() {
-    const token = localStorage.getItem('jwt_token');
-    if (token) {
-      this.isAuthenticated = true;
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        
-        // DEBUG: Log para ver qué hay en el payload
-        console.log('JWT Payload:', payload);
-        
-        // Obtener nombre - intentar múltiples campos posibles del JWT
-        this.userName = 
-          payload.name ||                    // Campo standard OIDC
-          payload.given_name ||              // Nombre de pila OIDC
-          payload.unique_name ||             // Azure AD
-          payload.email?.split('@')[0] ||    // Parte antes del @ del email
-          payload.email ||                   // Email completo
-          payload.sub ||                     // Subject
-          'Usuario';                         // Fallback
-        
-        // Obtener email
-        this.userEmail = payload.email || payload.sub || '';
-        
-        // Obtener inicial del nombre
-        this.userInitial = (this.userName && this.userName[0] ? this.userName[0] : 'U').toUpperCase();
+  toggleDrawer() {
+    this.isDrawerOpen = !this.isDrawerOpen;
+  }
 
-        // Obtener rol - intentar múltiples campos
-        let roleValue = payload.role || payload.roles || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-        
-        // Manejar rol como string o array
-        let userRoles: string[] = [];
-        if (Array.isArray(roleValue)) {
-          userRoles = roleValue;
-        } else if (typeof roleValue === 'string') {
-          userRoles = [roleValue];
-        }
-        
-        // Asignar primer rol encontrado, o 'Cliente' por defecto
-        this.userRole = userRoles[0] || 'Cliente';
-        
-        console.log('Rol extraído:', this.userRole, 'Roles del payload:', userRoles);
-
-        // Intentar obtener la foto del perfil (escalable)
-        const sessionPhoto = sessionStorage.getItem('user_profile_photo');
-        if (sessionPhoto) {
-          this.userPhotoUrl = sessionPhoto;
-        } else if (payload.profilePhotoUrl) {
-          this.userPhotoUrl = payload.profilePhotoUrl;
-        } else {
-          this.userPhotoUrl = null;
-        }
-
-        // Determinar link de dashboard basado en roles
-        if (userRoles.includes('Admin')) {
-          this.dashboardLink = '/admin';
-        } else if (userRoles.includes('Tendero')) {
-          this.dashboardLink = '/store';
-        } else {
-          this.dashboardLink = '/client';
-        }
-      } catch (e) {
-        console.error('Error decodificando token', e);
-        this.userName = 'Usuario';
-        this.userRole = 'Cliente';
+  /**
+   * Cerrar drawer al hacer click fuera
+   */
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    if (this.isDrawerOpen) {
+      const clickedInside = this.el.nativeElement.querySelector('.relative')?.contains(event.target);
+      if (!clickedInside) {
+        this.isDrawerOpen = false;
       }
-    } else {
-      this.isAuthenticated = false;
-      this.userName = '';
-      this.userRole = 'Cliente';
     }
   }
 
   logout() {
-    // Limpiar datos de sesión
-    localStorage.removeItem('jwt_token');
-    sessionStorage.removeItem('user_profile_photo');
-    
-    // Resetear estado del layout
-    this.isAuthenticated = false;
-    this.isDrawerOpen = false;
-    this.userName = '';
-    this.userEmail = '';
-    this.userPhotoUrl = null;
-    this.userRole = 'Cliente';
-    
-    // Navegar al home y recargar la página
-    this.router.navigate(['/']).then(() => {
-      // Recargar para limpiar todos los listeners y estado
-      window.location.reload();
-    });
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 
   getHomeRoute(): string {
@@ -193,10 +160,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }
     // Si no está autenticado, redirige a la página principal
     return '/';
-  }
-
-  toggleDrawer() {
-    this.isDrawerOpen = !this.isDrawerOpen;
   }
 
   toggleSidebar() {

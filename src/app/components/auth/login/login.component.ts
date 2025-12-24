@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { FirebaseAuthService } from '../../../core/services/auth/firebase-auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -23,14 +24,15 @@ export class LoginComponent implements OnInit {
   // 1. Propiedades para el formulario
   email = '';
   password = '';
-  loginRole: string = 'Cliente'; 
+  loginRole: string = 'Cliente';
   registerLink: string = '/register'; // Restaurada para el HTML
 
   constructor(
     private authService: AuthService,
     private firebaseAuth: FirebaseAuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -58,7 +60,7 @@ export class LoginComponent implements OnInit {
     const payload = { email: this.email, password: this.password };
     this.authService.loginLocal(payload).subscribe({
       next: (res) => this.handleLoginSuccess(res),
-      error: (err) => alert('Credenciales inválidas')
+      error: (err) => this.notificationService.showError('Credenciales inválidas', 'Error de Login')
     });
   }
 
@@ -86,7 +88,7 @@ export class LoginComponent implements OnInit {
 
     // Validar si el usuario tiene el rol del portal actual
     if (this.loginRole && !roles.includes(this.loginRole)) {
-      alert(`Error: No tienes permisos de ${this.loginRole}`);
+      this.notificationService.showWarning(`No tienes permisos de ${this.loginRole}`, 'Acceso Denegado');
       this.authService.logout();
       return;
     }

@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { LocationService } from '../../../core/services/location.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-register',
@@ -16,11 +17,9 @@ import { AuthService } from '../../../core/services/auth/auth.service';
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
-  errorMsg = '';
-  errorType: 'error' | 'warning' = 'error';
+  isRoleFixed = false;
   showPassword = false;
   showConfirmPassword = false;
-  isRoleFixed = false;
   loginLink = '/login';
   registerRole = 'Cliente';
 
@@ -34,7 +33,8 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private locationService: LocationService,
-    private authService: AuthService // Inyectamos el servicio corregido
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -53,7 +53,8 @@ export class RegisterComponent implements OnInit {
 
   initForm() {
     this.registerForm = this.fb.group({
-      nombre: ['', [Validators.required]],
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellido: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
@@ -82,8 +83,13 @@ export class RegisterComponent implements OnInit {
     this.loginLink = links[role] || '/login';
   }
 
-  togglePassword() { this.showPassword = !this.showPassword; }
-  toggleConfirmPassword() { this.showConfirmPassword = !this.showConfirmPassword; }
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
 
   // --- Lógica de Geografía ---
   cargarPaises() {
@@ -137,11 +143,13 @@ export class RegisterComponent implements OnInit {
     const formValue = this.registerForm.value;
     const body = {
       nombre: formValue.nombre,
+      apellido: formValue.apellido,
       email: formValue.email,
       password: formValue.password,
       rol: formValue.rol,
       pais: formValue.pais,
       ciudad: formValue.ciudad,
+      direccion: formValue.direccion || '',
       telefono: `${formValue.codigoPais} ${formValue.telefono}`,
       fechaNacimiento: formValue.fechaNacimiento ? new Date(formValue.fechaNacimiento) : null
     };
@@ -160,17 +168,15 @@ export class RegisterComponent implements OnInit {
   // --- MANEJO DE ERRORES CENTRALIZADO ---
   private handleRegisterError(err: any) {
     console.error('Error en registro:', err);
-    this.errorType = 'error';
 
     if (err.status === 409) {
-      this.errorMsg = '⚠️ Este correo electrónico ya está registrado.';
-      this.errorType = 'warning';
+      this.notificationService.showWarning('Este correo electrónico ya está registrado.', 'Correo en uso');
     } else if (err.status === 400) {
-      this.errorMsg = err.error?.message || 'Datos inválidos. Verifica los campos.';
+      this.notificationService.showError(err.error?.message || 'Datos inválidos. Verifica los campos.');
     } else if (err.status >= 500) {
-      this.errorMsg = '🔧 Error del sistema. Intenta más tarde.';
+      this.notificationService.showError('Error del sistema. Intenta más tarde.');
     } else {
-      this.errorMsg = 'No se pudo completar el registro.';
+      this.notificationService.showError('No se pudo completar el registro.');
     }
   }
 

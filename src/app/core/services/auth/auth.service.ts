@@ -1,14 +1,15 @@
 // core/services/auth/auth.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, tap, Observable } from 'rxjs';
+import { User, buildUserFromTokenPayload, buildUserFromDto, formatPhotoUrl } from '../../../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly API_URL = 'http://localhost:5237/api/Usuarios';
-  
+
   // Estado reactivo del usuario
-  private currentUserSubject = new BehaviorSubject<any>(null);
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
@@ -16,8 +17,48 @@ export class AuthService {
     const savedToken = localStorage.getItem('jwt_token');
     const savedRoles = JSON.parse(localStorage.getItem('user_roles') || '[]');
     if (savedToken) {
-      this.currentUserSubject.next({ token: savedToken, roles: savedRoles });
+      try {
+        const payload = JSON.parse(atob(savedToken.split('.')[1]));
+        const user = buildUserFromTokenPayload(payload);
+        this.currentUserSubject.next(user);
+      } catch {
+        this.currentUserSubject.next(null);
+      }
     }
+  }
+
+  // Obtener perfil del usuario autenticado
+  getMe() {
+    const token = localStorage.getItem('jwt_token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<any>(`${this.API_URL}/me`, { headers }).pipe(
+      tap(dto => {
+        if (dto) {
+          const user = buildUserFromDto(dto);
+          this.currentUserSubject.next(user);
+        }
+      })
+    );
+  }
+
+  // Actualizar perfil del usuario autenticado
+  updateMyProfile(profileData: any) {
+    const token = localStorage.getItem('jwt_token');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put<any>(`${this.API_URL}/me`, profileData, { headers }).pipe(
+      tap(dto => {
+        if (dto) {
+          const user = buildUserFromDto(dto);
+          this.currentUserSubject.next(user);
+        }
+      })
+    );
   }
 
   // Login Local (DB)
@@ -34,9 +75,22 @@ export class AuthService {
 
   // Guardar sesión de forma centralizada
   saveSession(response: any) {
-    localStorage.setItem('jwt_token', response.token);
-    localStorage.setItem('user_roles', JSON.stringify(response.roles || []));
-    this.currentUserSubject.next(response);
+    if (response?.token) {
+      localStorage.setItem('jwt_token', response.token);
+      localStorage.setItem('user_roles', JSON.stringify(response.roles || []));
+      try {
+        const payload = JSON.parse(atob(response.token.split('.')[1]));
+        const user = buildUserFromTokenPayload(payload);
+        // If backend returns explicit nombre/apellido/photoUrl in response, prefer them
+        if (response.nombre) user.nombre = response.nombre + (response.apellido ? (' ' + response.apellido) : '');
+        if (response.apellido) user.apellido = response.apellido;
+        if (response.photoUrl) user.photoUrl = formatPhotoUrl(response.photoUrl);
+
+        this.currentUserSubject.next(user);
+      } catch {
+        this.currentUserSubject.next(null);
+      }
+    }
   }
 
   // Helper para el Dispatcher

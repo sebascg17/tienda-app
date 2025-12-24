@@ -19,7 +19,7 @@ export interface UploadResponse {
   providedIn: 'root'
 })
 export class FileUploadService {
-  private apiUrl = `${environment.apiUrl}/api/upload`;
+  private apiUrl = environment.apiUrl.replace(/\/$/, '') + '/upload';
 
   constructor(private http: HttpClient) { }
 

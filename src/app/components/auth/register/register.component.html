@@ -16,24 +16,36 @@
 
     <form class="mt-8 space-y-6" [formGroup]="registerForm" (ngSubmit)="register()">
 
-      <div *ngIf="errorMsg" [ngClass]="{
-          'bg-red-50 text-red-700 border-red-500': errorType === 'error',
-          'bg-yellow-50 text-yellow-700 border-yellow-500': errorType === 'warning'
-        }" class="p-3 rounded-md text-sm border-l-4">
-        {{ errorMsg }}
-      </div>
+
 
       <div class="rounded-md shadow-sm space-y-4">
 
-        <!-- Nombre -->
-        <div>
-          <label for="nombre" class="auth-label block text-sm font-medium mb-2"
-            [ngClass]="'role-' + registerRole.toLowerCase()">Nombre Completo</label>
-          <input id="nombre" formControlName="nombre" type="text"
-            class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
-            [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="Tu nombre completo">
-          <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="text-xs text-red-500 mt-1">
-            El nombre es requerido.
+        <!-- Nombre y Apellido en fila (side-by-side en pantalla grande) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nombre -->
+          <div>
+            <label for="nombre" class="auth-label block text-sm font-medium mb-2"
+              [ngClass]="'role-' + registerRole.toLowerCase()">Nombre</label>
+            <input id="nombre" formControlName="nombre" type="text"
+              class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+              [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="Tu nombre">
+            <div *ngIf="f['nombre'].touched && f['nombre'].invalid" class="text-xs text-red-500 mt-1">
+              <span *ngIf="f['nombre'].errors?.['required']">El nombre es requerido.</span>
+              <span *ngIf="f['nombre'].errors?.['minlength']">El nombre debe tener al menos 2 caracteres.</span>
+            </div>
+          </div>
+
+          <!-- Apellido -->
+          <div>
+            <label for="apellido" class="auth-label block text-sm font-medium mb-2"
+              [ngClass]="'role-' + registerRole.toLowerCase()">Apellido</label>
+            <input id="apellido" formControlName="apellido" type="text"
+              class="auth-input appearance-none rounded-lg relative block w-full px-4 py-3 border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#08d15f] focus:bg-white dark:focus:bg-gray-600 sm:text-sm transition-all"
+              [ngClass]="'role-' + registerRole.toLowerCase()" placeholder="Tu apellido">
+            <div *ngIf="f['apellido'].touched && f['apellido'].invalid" class="text-xs text-red-500 mt-1">
+              <span *ngIf="f['apellido'].errors?.['required']">El apellido es requerido.</span>
+              <span *ngIf="f['apellido'].errors?.['minlength']">El apellido debe tener al menos 2 caracteres.</span>
+            </div>
           </div>
         </div>
 
@@ -49,8 +61,6 @@
           </div>
         </div>
 
-
-
         <!-- Fecha de Nacimiento -->
         <div>
           <label for="fechaNacimiento" class="auth-label block text-sm font-medium mb-2"
@@ -60,7 +70,7 @@
             [ngClass]="'role-' + registerRole.toLowerCase()">
         </div>
 
-        <!-- País (Común) -->
+        <!-- País -->
         <div>
           <label for="pais" class="auth-label block text-sm font-medium mb-2"
             [ngClass]="'role-' + registerRole.toLowerCase()">País</label>
@@ -72,13 +82,7 @@
           </select>
         </div>
 
-        <!-- Departamento (Movido a común para simplificar cascada global, o condicional si así se prefiere) -->
-        <!-- NOTA: El departamento estaba dentro de 'isTendero' pero la lógica de cascada normal suele incluirlo siempre.
-             Tu requerimiento anterior lo ponía en Tendero. Para la cascada funcione bien con Ciudad, debe estar disponible si se selecciona País.
-             Lo moveré aquí como parte del bloque común si queremos que CIUDAD dependa de DEPTO. 
-             Si Ciudad es libre, ok. Pero "Cascada" implica Pais -> Depto -> Ciudad.
-             Voy a asumir que para el registro ahora, estos campos son comunes o al menos visibles.
-        -->
+        <!-- Departamento -->
         <div>
           <label for="departamento" class="auth-label block text-sm font-medium mb-2"
             [ngClass]="'role-' + registerRole.toLowerCase()">Departamento/Estado</label>
@@ -90,7 +94,7 @@
           </select>
         </div>
 
-        <!-- Ciudad (Común) -->
+        <!-- Ciudad -->
         <div>
           <label for="ciudad" class="auth-label block text-sm font-medium mb-2"
             [ngClass]="'role-' + registerRole.toLowerCase()">Ciudad</label>

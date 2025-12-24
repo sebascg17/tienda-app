@@ -1,0 +1,28 @@
+<div class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+  <div *ngFor="let toast of toasts"
+    class="pointer-events-auto relative overflow-hidden rounded-xl shadow-2xl border backdrop-blur-md transition-all duration-300 animate-slide-in"
+    [ngClass]="getBgClass(toast.type)">
+
+    <!-- Barra de progreso (opcional para premium look) -->
+    <div class="absolute bottom-0 left-0 h-1 bg-white/30 animate-progress"></div>
+
+    <div class="p-4 flex items-start gap-3">
+      <!-- Icono -->
+      <div class="mt-0.5 flex-shrink-0">
+        <i class="pi" [ngClass]="getIcon(toast.type)" style="font-size: 1.25rem;"></i>
+      </div>
+
+      <!-- Texto -->
+      <div class="flex-grow">
+        <h3 class="font-bold text-sm">{{ toast.title }}</h3>
+        <p class="text-xs mt-0.5 opacity-90">{{ toast.message }}</p>
+      </div>
+
+      <!-- Botón cerrar (Más prominente) -->
+      <button (click)="removeToast(toast.id!)"
+        class="flex-shrink-0 hover:bg-white/30 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm">
+        <i class="pi pi-times text-sm"></i>
+      </button>
+    </div>
+  </div>
+</div>

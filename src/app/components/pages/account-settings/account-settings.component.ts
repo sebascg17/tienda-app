@@ -5,6 +5,7 @@ import { I18nService } from '../../../core/services/i18n.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { LocationService } from '../../../core/services/location.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -17,7 +18,7 @@ export class AccountSettingsComponent implements OnInit {
   // Información de contacto
   phoneNumber: string = '';
   countryCode: string = '+1';
-  
+
   // Ubicación
   selectedCountry: string = '';
   selectedState: string = '';
@@ -31,15 +32,18 @@ export class AccountSettingsComponent implements OnInit {
   // Estados
   isLoading: boolean = false;
   isSaving: boolean = false;
-  successMessage: string = '';
-  errorMessage: string = '';
+  isSavingAttempted: boolean = false;
   activeTab: 'contact' | 'location' = 'contact';
+
+  private initialContactState: any = null;
+  private initialLocationState: any = null;
 
   constructor(
     private i18nService: I18nService,
     private authService: AuthService,
-    private locationService: LocationService
-  ) {}
+    private locationService: LocationService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadAccountSettings();
@@ -55,6 +59,16 @@ export class AccountSettingsComponent implements OnInit {
     // Simulación:
     setTimeout(() => {
       this.isLoading = false;
+      // Inicializar estados para detección de cambios (Simulado con valores actuales)
+      this.initialContactState = {
+        phoneNumber: this.phoneNumber,
+        countryCode: this.countryCode
+      };
+      this.initialLocationState = {
+        country: this.selectedCountry,
+        state: this.selectedState,
+        city: this.selectedCity
+      };
     }, 500);
   }
 
@@ -112,9 +126,24 @@ export class AccountSettingsComponent implements OnInit {
    * Guardar cambios de contacto
    */
   saveContactInfo(): void {
+    this.isSavingAttempted = true;
+    // 1. Validar teléfono (ejemplo simple: longitud mínima)
+    if (this.phoneNumber && this.phoneNumber.length < 7) {
+      this.notificationService.showError('El número de teléfono no es válido', 'Error de Validación');
+      return;
+    }
+
+    // 2. Detectar cambios
+    const hasChanges =
+      this.phoneNumber !== this.initialContactState?.phoneNumber ||
+      this.countryCode !== this.initialContactState?.countryCode;
+
+    if (!hasChanges) {
+      this.notificationService.showInfo('No se detectaron cambios en la información de contacto');
+      return;
+    }
+
     this.isSaving = true;
-    this.successMessage = '';
-    this.errorMessage = '';
 
     const contactData = {
       telefonoNumber: this.phoneNumber,
@@ -137,8 +166,13 @@ export class AccountSettingsComponent implements OnInit {
     // Simulación:
     setTimeout(() => {
       this.isSaving = false;
-      this.successMessage = this.i18nService.translate('messages.success');
-      setTimeout(() => (this.successMessage = ''), 3000);
+      this.notificationService.showSuccess(this.i18nService.translate('messages.success'));
+
+      // Actualizar estado inicial
+      this.initialContactState = {
+        phoneNumber: this.phoneNumber,
+        countryCode: this.countryCode
+      };
     }, 1000);
   }
 
@@ -146,9 +180,25 @@ export class AccountSettingsComponent implements OnInit {
    * Guardar cambios de ubicación
    */
   saveLocationInfo(): void {
+    this.isSavingAttempted = true;
+    // 1. Validar campos obligatorios
+    if (!this.selectedCountry || !this.selectedState || !this.selectedCity) {
+      this.notificationService.showError('Por favor completa todos los campos de ubicación');
+      return;
+    }
+
+    // 2. Detectar cambios
+    const hasChanges =
+      this.selectedCountry !== this.initialLocationState?.country ||
+      this.selectedState !== this.initialLocationState?.state ||
+      this.selectedCity !== this.initialLocationState?.city;
+
+    if (!hasChanges) {
+      this.notificationService.showInfo('No se detectaron cambios en la ubicación');
+      return;
+    }
+
     this.isSaving = true;
-    this.successMessage = '';
-    this.errorMessage = '';
 
     const locationData = {
       pais: this.selectedCountry,
@@ -172,8 +222,14 @@ export class AccountSettingsComponent implements OnInit {
     // Simulación:
     setTimeout(() => {
       this.isSaving = false;
-      this.successMessage = this.i18nService.translate('messages.success');
-      setTimeout(() => (this.successMessage = ''), 3000);
+      this.notificationService.showSuccess(this.i18nService.translate('messages.success'));
+
+      // Actualizar estado inicial
+      this.initialLocationState = {
+        country: this.selectedCountry,
+        state: this.selectedState,
+        city: this.selectedCity
+      };
     }, 1000);
   }
 
@@ -182,7 +238,5 @@ export class AccountSettingsComponent implements OnInit {
    */
   switchTab(tab: 'contact' | 'location'): void {
     this.activeTab = tab;
-    this.successMessage = '';
-    this.errorMessage = '';
   }
 }
